@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Coaching Application – ROW Swim Club</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: Arial, Helvetica, sans-serif;
+      background: #F3EFE4;
+      color: #152225;
+      min-height: 100vh;
+    }
+
+    /* ── Header ── */
+    .site-header {
+      background: linear-gradient(135deg, #114C5E 0%, #0A2E3F 60%, #062029 100%);
+      padding: 36px 24px 32px;
+      text-align: center;
+    }
+    .site-header .eyebrow {
+      font-family: 'Courier New', Courier, monospace;
+      font-weight: 700;
+      font-size: 12px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: #ffffff;
+      display: block;
+      margin-bottom: 10px;
+    }
+    .site-header h1 {
+      font-family: 'Arial Black', Arial, sans-serif;
+      text-transform: uppercase;
+      letter-spacing: 0.02em;
+      color: #ffffff;
+      font-size: 28px;
+      line-height: 1.1;
+      margin-bottom: 10px;
+    }
+    .site-header p {
+      color: #CBDDE1;
+      font-size: 15px;
+      line-height: 1.6;
+      max-width: 540px;
+      margin: 0 auto;
+    }
+
+    /* ── Lane stripe ── */
+    .lanes {
+      height: 7px;
+      display: flex;
+    }
+    .lanes div { flex: 1; }
+
+    /* ── Layout ── */
+    .wrap {
+      max-width: 740px;
+      margin: 32px auto 60px;
+      padding: 0 16px;
+    }
+
+    /* ── Form sections ── */
+    .form-section {
+      background: #ffffff;
+      border: 1px solid #DAD3C2;
+      border-radius: 12px;
+      padding: 26px 28px;
+      margin-bottom: 22px;
+    }
+    .section-title {
+      font-family: 'Arial Black', Arial, sans-serif;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      color: #0A2E3F;
+      font-size: 14px;
+      padding-bottom: 12px;
+      border-bottom: 2px solid #3FBFB0;
+      margin-bottom: 18px;
+    }
+    .section-intro {
+      font-size: 13.5px;
+      color: #4B5B60;
+      margin-bottom: 16px;
+      line-height: 1.55;
+    }
+
+    /* ── Pathway groups (checkboxes) ── */
+    .pathway-block {
+      margin-bottom: 20px;
+    }
+    .pathway-block:last-child { margin-bottom: 0; }
+    .pathway-name {
+      font-family: 'Courier New', Courier, monospace;
+      font-weight: 700;
+      font-size: 11px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: #136B77;
+      margin-bottom: 9px;
+    }
+    .check-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .check-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      cursor: pointer;
+    }
+    .check-item input[type="checkbox"] {
+      width: 17px;
+      height: 17px;
+      accent-color: #136B77;
+      cursor: pointer;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+    .check-item span {
+      font-size: 14.5px;
+      color: #152225;
+      line-height: 1.4;
+    }
+
+    /* ── Text fields ── */
+    .field-group { margin-bottom: 18px; }
+    .field-group:last-child { margin-bottom: 0; }
+
+    label.field-label {
+      display: block;
+      font-size: 14px;
+      font-weight: 700;
+      color: #0A2E3F;
+      margin-bottom: 7px;
+    }
+    .req { color: #D64545; margin-left: 2px; }
+
+    input[type="text"],
+    input[type="email"],
+    input[type="tel"],
+    textarea {
+      width: 100%;
+      padding: 11px 14px;
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: 15px;
+      color: #152225;
+      background: #ffffff;
+      border: 1px solid #DAD3C2;
+      border-radius: 8px;
+      outline: none;
+      transition: border-color 0.18s, box-shadow 0.18s;
+    }
+    input[type="text"]:focus,
+    input[type="email"]:focus,
+    input[type="tel"]:focus,
+    textarea:focus {
+      border-color: #136B77;
+      box-shadow: 0 0 0 3px rgba(63, 191, 176, 0.18);
+    }
+    textarea {
+      min-height: 140px;
+      resize: vertical;
+      line-height: 1.6;
+    }
+    .hint { font-size: 12.5px; color: #4B5B60; margin-top: 5px; line-height: 1.45; }
+
+    /* ── File upload ── */
+    .file-drop {
+      width: 100%;
+      padding: 14px 16px;
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: 14px;
+      color: #152225;
+      background: #FAF8F2;
+      border: 2px dashed #DAD3C2;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: border-color 0.18s;
+      display: block;
+    }
+    .file-drop:hover { border-color: #136B77; }
+
+    /* ── Validation error ── */
+    .err-msg {
+      display: none;
+      font-size: 12.5px;
+      color: #D64545;
+      margin-top: 5px;
+      font-weight: 700;
+    }
+    .has-error .err-msg { display: block; }
+    .has-error input,
+    .has-error textarea,
+    .has-error .file-drop { border-color: #D64545; }
+
+    /* ── Submit ── */
+    .submit-btn {
+      display: block;
+      width: 100%;
+      padding: 15px 24px;
+      font-family: 'Arial Black', Arial, sans-serif;
+      font-size: 16px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: #ffffff;
+      background: #0A2E3F;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .submit-btn:hover { background: #136B77; }
+    .submit-btn:disabled { background: #8aa0a8; cursor: not-allowed; }
+
+    .privacy {
+      font-size: 12.5px;
+      color: #4B5B60;
+      text-align: center;
+      margin-top: 14px;
+      line-height: 1.55;
+    }
+    .privacy a { color: #136B77; }
+
+    /* ── Thank-you state ── */
+    .thankyou {
+      display: none;
+      background: #EFFAF8;
+      border: 1px solid #3FBFB0;
+      border-radius: 12px;
+      padding: 36px 28px;
+      text-align: center;
+      margin-bottom: 22px;
+    }
+    .thankyou h2 {
+      font-family: 'Arial Black', Arial, sans-serif;
+      text-transform: uppercase;
+      color: #0A2E3F;
+      font-size: 20px;
+      margin-bottom: 12px;
+    }
+    .thankyou p { color: #152225; font-size: 15px; line-height: 1.65; }
+
+    @media (max-width: 520px) {
+      .form-section { padding: 20px 16px; }
+      .site-header  { padding: 28px 18px 24px; }
+      .site-header h1 { font-size: 22px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── Header ─────────────────────────────────────────────────────────────── -->
+<header class="site-header">
+  <span class="eyebrow">ROW Swim Club</span>
+  <h1>Coaching Application</h1>
+  <p>Tell us about yourself and the roles you are interested in. We review all applications and will be in touch.</p>
+</header>
+
+<!-- ── Lane stripe ────────────────────────────────────────────────────────── -->
+<div class="lanes">
+  <div style="background:#D64545;"></div>
+  <div style="background:#ffffff;"></div>
+  <div style="background:#136B77;"></div>
+  <div style="background:#ffffff;"></div>
+  <div style="background:#3FBFB0;"></div>
+  <div style="background:#ffffff;"></div>
+  <div style="background:#D64545;"></div>
+  <div style="background:#ffffff;"></div>
+</div>
+
+<div class="wrap">
+
+  <!-- ── Thank-you panel (shown after submit) ─────────────────────────────── -->
+  <div class="thankyou" id="thankyou">
+    <h2>Application Received</h2>
+    <p>Thank you for your interest in joining the ROW team. We will review your application and follow up by email. We appreciate your time.</p>
+  </div>
+
+  <!-- ── IMPORTANT ────────────────────────────────────────────────────────────
+       Replace xyegkvwy with the ID from your Formspree dashboard.
+       1. Sign up at https://formspree.io
+       2. Create a new form — set the notification email to gm@rowswimming.ca
+       3. Copy the form ID (e.g. xpzgkwqr) and paste it below
+       For Google Sheets logging: use Formspree's Plugins tab (paid plan)
+       or connect via Zapier (free tier, Formspree → Google Sheets).
+       ───────────────────────────────────────────────────────────────────── -->
+  <form
+    id="appForm"
+    action="https://formspree.io/f/xyegkvwy"
+    method="POST"
+    enctype="multipart/form-data"
+    novalidate>
+
+    <!-- Formspree control fields -->
+    <input type="hidden" name="_subject"  value="New Coaching Application – ROW Swim Club">
+    <input type="hidden" name="_replyto"  value=""><!-- filled by JS from email field -->
+    <input type="text"   name="_gotcha"   style="display:none" tabindex="-1" autocomplete="off">
+
+    <!-- ── Section 1: Positions of Interest ─────────────────────────────── -->
+    <div class="form-section" id="sec-positions">
+      <div class="section-title">Positions of Interest <span class="req">*</span></div>
+      <p class="section-intro">Select all roles you would like to be considered for. You may choose more than one.</p>
+
+      <div class="pathway-block">
+        <div class="pathway-name">Assistant Performance Coach</div>
+        <div class="check-list">
+          <label class="check-item">
+            <input type="checkbox" name="position[]" value="Assistant Coach – National Pathway">
+            <span>Assistant Coach – National Pathway</span>
+          </label>
+          <label class="check-item">
+            <input type="checkbox" name="position[]" value="Assistant Coach – Provincial Pathway">
+            <span>Assistant Coach – Provincial Pathway</span>
+          </label>
+        </div>
+      </div>
+
+      <div class="pathway-block">
+        <div class="pathway-name">Lead Group Coach</div>
+        <div class="check-list">
+          <label class="check-item">
+            <input type="checkbox" name="position[]" value="Lead Group Coach – Age Group Development (12 & Under)">
+            <span>Age Group Development (12 &amp; Under)</span>
+          </label>
+          <label class="check-item">
+            <input type="checkbox" name="position[]" value="Lead Group Coach – Age Group Development (14 & Under)">
+            <span>Age Group Development (14 &amp; Under)</span>
+          </label>
+          <label class="check-item">
+            <input type="checkbox" name="position[]" value="Lead Group Coach – Recreation (AM Sessions)">
+            <span>Recreation – AM Sessions</span>
+          </label>
+          <label class="check-item">
+            <input type="checkbox" name="position[]" value="Lead Group Coach – Recreation (PM Sessions)">
+            <span>Recreation – PM Sessions</span>
+          </label>
+          <label class="check-item">
+            <input type="checkbox" name="position[]" value="Lead Group Coach – ROW Swim Academy">
+            <span>ROW Swim Academy</span>
+          </label>
+        </div>
+      </div>
+
+      <div class="pathway-block">
+        <div class="pathway-name">Assistant Regional Development Coach</div>
+        <div class="check-list">
+          <label class="check-item">
+            <input type="checkbox" name="position[]" value="Asst Regional – Age Group Development (12 & Under)">
+            <span>Assistant – Age Group Development (12 &amp; Under)</span>
+          </label>
+          <label class="check-item">
+            <input type="checkbox" name="position[]" value="Asst Regional – Age Group Development (14 & Under)">
+            <span>Assistant – Age Group Development (14 &amp; Under)</span>
+          </label>
+          <label class="check-item">
+            <input type="checkbox" name="position[]" value="Asst Regional – Senior Development (18 & Under)">
+            <span>Assistant – Senior Development (18 &amp; Under)</span>
+          </label>
+        </div>
+      </div>
+
+      <div class="pathway-block">
+        <div class="pathway-name">Assistant Junior Development Coach</div>
+        <div class="check-list">
+          <label class="check-item">
+            <input type="checkbox" name="position[]" value="Asst Junior – Junior Development 1">
+            <span>Assistant – Junior Development 1</span>
+          </label>
+          <label class="check-item">
+            <input type="checkbox" name="position[]" value="Asst Junior – Junior Development 2">
+            <span>Assistant – Junior Development 2</span>
+          </label>
+          <label class="check-item">
+            <input type="checkbox" name="position[]" value="Lane Coach – TOPS (3x per week)">
+            <span>Lane Coach – TOPS (3x per week)</span>
+          </label>
+          <label class="check-item">
+            <input type="checkbox" name="position[]" value="Lane Coach – TOPS (2x per week)">
+            <span>Lane Coach – TOPS (2x per week)</span>
+          </label>
+          <label class="check-item">
+            <input type="checkbox" name="position[]" value="Lane Coach – ROW Swim Academy">
+            <span>Lane Coach – ROW Swim Academy</span>
+          </label>
+        </div>
+      </div>
+
+      <div class="pathway-block">
+        <div class="pathway-name">Administration &amp; Operations</div>
+        <div class="check-list">
+          <label class="check-item">
+            <input type="checkbox" name="position[]" value="Part-Time Registration and Office Administrator">
+            <span>Part-Time Registration and Office Administrator</span>
+          </label>
+        </div>
+      </div>
+
+      <p class="err-msg" id="err-positions">Please select at least one position.</p>
+    </div>
+
+    <!-- ── Section 2: About You ──────────────────────────────────────────── -->
+    <div class="form-section">
+      <div class="section-title">About You</div>
+
+      <div class="field-group" id="fg-name">
+        <label class="field-label" for="name">Full Name <span class="req">*</span></label>
+        <input type="text" id="name" name="name" required autocomplete="name"
+               placeholder="Your full name">
+        <p class="err-msg">Please enter your full name.</p>
+      </div>
+
+      <div class="field-group" id="fg-email">
+        <label class="field-label" for="email">Email Address <span class="req">*</span></label>
+        <input type="email" id="email" name="email" required autocomplete="email"
+               placeholder="your@email.com">
+        <p class="err-msg">Please enter a valid email address.</p>
+      </div>
+
+      <div class="field-group" id="fg-phone">
+        <label class="field-label" for="phone">Phone Number <span class="req">*</span></label>
+        <input type="tel" id="phone" name="phone" required autocomplete="tel"
+               placeholder="(613) 555-0100">
+        <p class="err-msg">Please enter a phone number.</p>
+      </div>
+    </div>
+
+    <!-- ── Section 4: Motivation ─────────────────────────────────────────── -->
+    <div class="form-section">
+      <div class="section-title">Why ROW? <span class="req">*</span></div>
+
+      <div class="field-group" id="fg-motivation">
+        <label class="field-label" for="motivation">
+          Share a bit about yourself and why you want to join the ROW team.
+          <span class="req">*</span>
+        </label>
+        <textarea id="motivation" name="motivation" required
+          placeholder="Tell us about your coaching background, what draws you to ROW, and what you hope to contribute to our athletes…"></textarea>
+        <p class="hint">One to two paragraphs is plenty. Be direct.</p>
+        <p class="err-msg">Please tell us a bit about yourself (at least 50 characters).</p>
+      </div>
+    </div>
+
+    <!-- ── Section 5: Resume ─────────────────────────────────────────────── -->
+    <div class="form-section">
+      <div class="section-title">Resume <span class="req">*</span></div>
+
+      <div class="field-group" id="fg-resume">
+        <label class="field-label" for="resume">Upload your current resume <span class="req">*</span></label>
+        <input type="file" id="resume" name="resume" accept=".pdf,.doc,.docx"
+               class="file-drop" required>
+        <p class="hint">PDF or Word (.doc, .docx). Maximum 10 MB.</p>
+        <p class="err-msg">Please attach your resume.</p>
+      </div>
+    </div>
+
+    <!-- ── Submit ─────────────────────────────────────────────────────────── -->
+    <button type="submit" class="submit-btn" id="submitBtn">Submit Application</button>
+    <p class="privacy">
+      Your information is used only to assess your application. We do not share it outside the club.<br>
+      Questions? Email <a href="mailto:gm@rowswimming.ca">gm@rowswimming.ca</a>
+    </p>
+
+  </form>
+</div>
+
+<script>
+  (function () {
+    var form    = document.getElementById('appForm');
+    var btn     = document.getElementById('submitBtn');
+    var thankYou = document.getElementById('thankyou');
+
+    /* Wire _replyto to the email field so Formspree reply-to works */
+    document.getElementById('email').addEventListener('input', function () {
+      form.querySelector('input[name="_replyto"]').value = this.value;
+    });
+
+    /* ── Validate ── */
+    function validate() {
+      var ok = true;
+
+      /* Positions: at least one checked */
+      var positions = form.querySelectorAll('input[name="position[]"]:checked');
+      var secPos    = document.getElementById('sec-positions');
+      if (positions.length === 0) {
+        secPos.classList.add('has-error');
+        document.getElementById('err-positions').style.display = 'block';
+        ok = false;
+      } else {
+        secPos.classList.remove('has-error');
+        document.getElementById('err-positions').style.display = 'none';
+      }
+
+      /* Name */
+      var nameEl = document.getElementById('name');
+      var fgName = document.getElementById('fg-name');
+      if (!nameEl.value.trim()) {
+        fgName.classList.add('has-error'); ok = false;
+      } else { fgName.classList.remove('has-error'); }
+
+      /* Email */
+      var emailEl = document.getElementById('email');
+      var fgEmail = document.getElementById('fg-email');
+      if (!emailEl.value.trim() || !emailEl.checkValidity()) {
+        fgEmail.classList.add('has-error'); ok = false;
+      } else { fgEmail.classList.remove('has-error'); }
+
+      /* Phone */
+      var phoneEl = document.getElementById('phone');
+      var fgPhone = document.getElementById('fg-phone');
+      if (!phoneEl.value.trim()) {
+        fgPhone.classList.add('has-error'); ok = false;
+      } else { fgPhone.classList.remove('has-error'); }
+
+      /* Motivation */
+      var motEl = document.getElementById('motivation');
+      var fgMot = document.getElementById('fg-motivation');
+      if (motEl.value.trim().length < 50) {
+        fgMot.classList.add('has-error'); ok = false;
+      } else { fgMot.classList.remove('has-error'); }
+
+      /* Resume */
+      var resumeEl = document.getElementById('resume');
+      var fgRes    = document.getElementById('fg-resume');
+      if (!resumeEl.files || resumeEl.files.length === 0) {
+        fgRes.classList.add('has-error'); ok = false;
+      } else { fgRes.classList.remove('has-error'); }
+
+      return ok;
+    }
+
+    /* ── Submit handler ── */
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+
+      if (!validate()) {
+        /* Scroll to first error */
+        var firstErr = form.querySelector('.has-error');
+        if (firstErr) firstErr.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        return;
+      }
+
+      btn.disabled    = true;
+      btn.textContent = 'Submitting…';
+
+      var data = new FormData(form);
+
+      fetch(form.action, {
+        method:  'POST',
+        body:    data,
+        headers: { 'Accept': 'application/json' }
+      })
+      .then(function (res) {
+        if (res.ok) {
+          form.style.display    = 'none';
+          thankYou.style.display = 'block';
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        } else {
+          res.json().then(function (data) {
+            btn.disabled    = false;
+            btn.textContent = 'Submit Application';
+            alert('There was a problem submitting your application. Please email gm@rowswimming.ca directly.');
+          });
+        }
+      })
+      .catch(function () {
+        btn.disabled    = false;
+        btn.textContent = 'Submit Application';
+        alert('Network error. Please check your connection and try again, or email gm@rowswimming.ca directly.');
+      });
+    });
+  })();
+</script>
+
+</body>
+</html>
