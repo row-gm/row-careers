@@ -292,7 +292,6 @@
     id="appForm"
     action="https://formspree.io/f/xyegkvwy"
     method="POST"
-    enctype="multipart/form-data"
     novalidate>
 
     <!-- Formspree control fields -->
@@ -444,21 +443,8 @@
       </div>
     </div>
 
-    <!-- ── Section 5: Resume ─────────────────────────────────────────────── -->
-    <div class="form-section">
-      <div class="section-title">Resume <span class="req">*</span></div>
-
-      <div class="field-group" id="fg-resume">
-        <label class="field-label" for="resume">Upload your current resume <span class="req">*</span></label>
-        <input type="file" id="resume" name="resume" accept=".pdf,.doc,.docx"
-               class="file-drop" required>
-        <p class="hint">PDF or Word (.doc, .docx). Maximum 10 MB.</p>
-        <p class="err-msg">Please attach your resume.</p>
-      </div>
-    </div>
-
     <!-- ── Submit ─────────────────────────────────────────────────────────── -->
-    <button type="submit" class="submit-btn" id="submitBtn">Submit Application</button>
+    <button type="submit" class="submit-btn" id="submitBtn">Submit — we'll be in touch</button>
     <p class="privacy">
       Your information is used only to assess your application. We do not share it outside the club.<br>
       Questions? Email <a href="mailto:gm@rowswimming.ca">gm@rowswimming.ca</a>
@@ -521,13 +507,6 @@
       if (motEl.value.trim().length < 50) {
         fgMot.classList.add('has-error'); ok = false;
       } else { fgMot.classList.remove('has-error'); }
-
-      /* Resume */
-      var resumeEl = document.getElementById('resume');
-      var fgRes    = document.getElementById('fg-resume');
-      if (!resumeEl.files || resumeEl.files.length === 0) {
-        fgRes.classList.add('has-error'); ok = false;
-      } else { fgRes.classList.remove('has-error'); }
 
       return ok;
     }
