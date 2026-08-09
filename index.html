@@ -427,19 +427,35 @@
       </div>
     </div>
 
-    <!-- ── Section 4: Motivation ─────────────────────────────────────────── -->
+    <!-- ── Section 4: Why ROW? ────────────────────────────────────────────── -->
     <div class="form-section">
       <div class="section-title">Why ROW? <span class="req">*</span></div>
 
-      <div class="field-group" id="fg-motivation">
-        <label class="field-label" for="motivation">
-          Share a bit about yourself and why you want to join the ROW team.
+      <div class="field-group" id="fg-why-row">
+        <label class="field-label" for="why-row">
+          What draws you to ROW Swim Club specifically?
           <span class="req">*</span>
         </label>
-        <textarea id="motivation" name="motivation" required
-          placeholder="Tell us about your coaching background, what draws you to ROW, and what you hope to contribute to our athletes…"></textarea>
-        <p class="hint">One to two paragraphs is plenty. Be direct.</p>
-        <p class="err-msg">Please tell us a bit about yourself (at least 50 characters).</p>
+        <textarea id="why-row" name="why_row" required
+          placeholder="Tell us what you know about ROW and why this club, at this time…"></textarea>
+        <p class="hint">A paragraph is plenty. Be direct.</p>
+        <p class="err-msg">Please tell us why ROW (at least 50 characters).</p>
+      </div>
+    </div>
+
+    <!-- ── Section 5: Why You? ────────────────────────────────────────────── -->
+    <div class="form-section">
+      <div class="section-title">Why You? <span class="req">*</span></div>
+
+      <div class="field-group" id="fg-why-you">
+        <label class="field-label" for="why-you">
+          What makes you the right person for this role? Walk us through the experience most relevant to the position(s) you selected above.
+          <span class="req">*</span>
+        </label>
+        <textarea id="why-you" name="why_you" required
+          placeholder="Tell us about specific experience — coaching groups, age ranges, certifications, administrative work, or anything else directly relevant to the role(s) you are applying for…"></textarea>
+        <p class="hint">Be specific. Generic answers are hard to act on.</p>
+        <p class="err-msg">Please tell us why you (at least 50 characters).</p>
       </div>
     </div>
 
@@ -501,12 +517,19 @@
         fgPhone.classList.add('has-error'); ok = false;
       } else { fgPhone.classList.remove('has-error'); }
 
-      /* Motivation */
-      var motEl = document.getElementById('motivation');
-      var fgMot = document.getElementById('fg-motivation');
-      if (motEl.value.trim().length < 50) {
-        fgMot.classList.add('has-error'); ok = false;
-      } else { fgMot.classList.remove('has-error'); }
+      /* Why ROW */
+      var whyRowEl = document.getElementById('why-row');
+      var fgWhyRow = document.getElementById('fg-why-row');
+      if (whyRowEl.value.trim().length < 50) {
+        fgWhyRow.classList.add('has-error'); ok = false;
+      } else { fgWhyRow.classList.remove('has-error'); }
+
+      /* Why You */
+      var whyYouEl = document.getElementById('why-you');
+      var fgWhyYou = document.getElementById('fg-why-you');
+      if (whyYouEl.value.trim().length < 50) {
+        fgWhyYou.classList.add('has-error'); ok = false;
+      } else { fgWhyYou.classList.remove('has-error'); }
 
       return ok;
     }
