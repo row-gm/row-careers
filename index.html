@@ -125,6 +125,22 @@
       line-height: 1.4;
     }
 
+    /* ── Positions loading / error states ── */
+    .positions-loading {
+      font-size: 14px;
+      color: #4B5B60;
+      padding: 12px 0;
+    }
+    .positions-error {
+      font-size: 13.5px;
+      color: #D64545;
+      padding: 10px 14px;
+      background: #FEF2F2;
+      border: 1px solid #FECACA;
+      border-radius: 8px;
+      line-height: 1.5;
+    }
+
     /* ── Text fields ── */
     .field-group { margin-bottom: 18px; }
     .field-group:last-child { margin-bottom: 0; }
@@ -304,98 +320,9 @@
       <div class="section-title">Positions of Interest <span class="req">*</span></div>
       <p class="section-intro">Select all roles you would like to be considered for. You may choose more than one.</p>
 
-      <div class="pathway-block">
-        <div class="pathway-name">Assistant Performance Coach</div>
-        <div class="check-list">
-          <label class="check-item">
-            <input type="checkbox" name="position[]" value="Assistant Coach – National Pathway">
-            <span>Assistant Coach – National Pathway</span>
-          </label>
-          <label class="check-item">
-            <input type="checkbox" name="position[]" value="Assistant Coach – Provincial Pathway">
-            <span>Assistant Coach – Provincial Pathway</span>
-          </label>
-        </div>
-      </div>
-
-      <div class="pathway-block">
-        <div class="pathway-name">Lead Group Coach</div>
-        <div class="check-list">
-          <label class="check-item">
-            <input type="checkbox" name="position[]" value="Lead Group Coach – Age Group Development (12 & Under)">
-            <span>Age Group Development (12 &amp; Under)</span>
-          </label>
-          <label class="check-item">
-            <input type="checkbox" name="position[]" value="Lead Group Coach – Age Group Development (14 & Under)">
-            <span>Age Group Development (14 &amp; Under)</span>
-          </label>
-          <label class="check-item">
-            <input type="checkbox" name="position[]" value="Lead Group Coach – Recreation (AM Sessions)">
-            <span>Recreation – AM Sessions</span>
-          </label>
-          <label class="check-item">
-            <input type="checkbox" name="position[]" value="Lead Group Coach – Recreation (PM Sessions)">
-            <span>Recreation – PM Sessions</span>
-          </label>
-          <label class="check-item">
-            <input type="checkbox" name="position[]" value="Lead Group Coach – ROW Swim Academy">
-            <span>ROW Swim Academy</span>
-          </label>
-        </div>
-      </div>
-
-      <div class="pathway-block">
-        <div class="pathway-name">Assistant Regional Development Coach</div>
-        <div class="check-list">
-          <label class="check-item">
-            <input type="checkbox" name="position[]" value="Asst Regional – Age Group Development (12 & Under)">
-            <span>Assistant – Age Group Development (12 &amp; Under)</span>
-          </label>
-          <label class="check-item">
-            <input type="checkbox" name="position[]" value="Asst Regional – Age Group Development (14 & Under)">
-            <span>Assistant – Age Group Development (14 &amp; Under)</span>
-          </label>
-          <label class="check-item">
-            <input type="checkbox" name="position[]" value="Asst Regional – Senior Development (18 & Under)">
-            <span>Assistant – Senior Development (18 &amp; Under)</span>
-          </label>
-        </div>
-      </div>
-
-      <div class="pathway-block">
-        <div class="pathway-name">Assistant Junior Development Coach</div>
-        <div class="check-list">
-          <label class="check-item">
-            <input type="checkbox" name="position[]" value="Asst Junior – Junior Development 1">
-            <span>Assistant – Junior Development 1</span>
-          </label>
-          <label class="check-item">
-            <input type="checkbox" name="position[]" value="Asst Junior – Junior Development 2">
-            <span>Assistant – Junior Development 2</span>
-          </label>
-          <label class="check-item">
-            <input type="checkbox" name="position[]" value="Lane Coach – TOPS (3x per week)">
-            <span>Lane Coach – TOPS (3x per week)</span>
-          </label>
-          <label class="check-item">
-            <input type="checkbox" name="position[]" value="Lane Coach – TOPS (2x per week)">
-            <span>Lane Coach – TOPS (2x per week)</span>
-          </label>
-          <label class="check-item">
-            <input type="checkbox" name="position[]" value="Lane Coach – ROW Swim Academy">
-            <span>Lane Coach – ROW Swim Academy</span>
-          </label>
-        </div>
-      </div>
-
-      <div class="pathway-block">
-        <div class="pathway-name">Administration &amp; Operations</div>
-        <div class="check-list">
-          <label class="check-item">
-            <input type="checkbox" name="position[]" value="Part-Time Registration and Office Administrator">
-            <span>Part-Time Registration and Office Administrator</span>
-          </label>
-        </div>
+      <!-- Roles are loaded dynamically from the Google Sheet -->
+      <div id="positions-container">
+        <p class="positions-loading">Loading available positions…</p>
       </div>
 
       <p class="err-msg" id="err-positions">Please select at least one position.</p>
@@ -470,6 +397,138 @@
 </div>
 
 <script>
+  /* ── Dynamic role loader ──────────────────────────────────────────────────
+     Fetches the Careers tab from the published Google Sheet CSV and builds
+     the Positions of Interest checkboxes dynamically.
+     Roles with Active = TRUE are shown; everything else is hidden.
+     Roles are grouped by Category, sorted by Category_Order.
+  ─────────────────────────────────────────────────────────────────────── */
+  (function () {
+    var CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSibBf9qGZWKNPOkutZn19X2zcqUG_HiuvauHTVtrcUkajm-I5dkLCgcL_GZ88l2BFkqWtBTorC3wHZ/pub?gid=0&single=true&output=csv';
+    var container = document.getElementById('positions-container');
+
+    /* Simple CSV parser — handles quoted fields with commas inside */
+    function parseCsv(text) {
+      var rows = [];
+      var lines = text.split(/\r?\n/);
+      for (var i = 0; i < lines.length; i++) {
+        var line = lines[i];
+        if (!line.trim()) continue;
+        var fields = [];
+        var cur = '';
+        var inQ = false;
+        for (var j = 0; j < line.length; j++) {
+          var ch = line[j];
+          if (ch === '"') {
+            if (inQ && line[j + 1] === '"') { cur += '"'; j++; }
+            else { inQ = !inQ; }
+          } else if (ch === ',' && !inQ) {
+            fields.push(cur); cur = '';
+          } else {
+            cur += ch;
+          }
+        }
+        fields.push(cur);
+        rows.push(fields);
+      }
+      return rows;
+    }
+
+    /* Escape text for safe HTML insertion */
+    function esc(s) {
+      return String(s)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    /* Build the pathway-block HTML for one category */
+    function renderCategory(catName, roles) {
+      var checkItems = roles.map(function (role) {
+        var title = esc(role.Title);
+        return (
+          '<label class="check-item">' +
+            '<input type="checkbox" name="position[]" value="' + title + '">' +
+            '<span>' + title + '</span>' +
+          '</label>'
+        );
+      }).join('\n');
+
+      return (
+        '<div class="pathway-block">' +
+          '<div class="pathway-name">' + esc(catName) + '</div>' +
+          '<div class="check-list">' + checkItems + '</div>' +
+        '</div>'
+      );
+    }
+
+    /* Fetch and render */
+    fetch(CSV_URL)
+      .then(function (res) {
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        return res.text();
+      })
+      .then(function (text) {
+        var rows = parseCsv(text);
+        if (rows.length < 2) throw new Error('No data rows found');
+
+        /* Map header names to column indices */
+        var headers = rows[0].map(function (h) { return h.trim(); });
+        function col(name) { return headers.indexOf(name); }
+
+        var iTitle    = col('Title');
+        var iCategory = col('Category');
+        var iOrder    = col('Category_Order');
+        var iActive   = col('Active');
+
+        /* Filter to Active = TRUE */
+        var active = rows.slice(1).filter(function (r) {
+          var a = (r[iActive] || '').trim().toUpperCase();
+          return a === 'TRUE' || a === 'YES' || a === '1';
+        });
+
+        if (active.length === 0) {
+          container.innerHTML = '<p class="positions-error">No open positions at this time. Check back soon or email <a href="mailto:gm@rowswimming.ca" style="color:#136B77;">gm@rowswimming.ca</a> to express interest.</p>';
+          return;
+        }
+
+        /* Group by category, track order */
+        var cats = {};     /* catName → [role, …] */
+        var orders = {};   /* catName → Category_Order */
+        active.forEach(function (r) {
+          var cat   = (r[iCategory] || '').trim();
+          var order = parseInt((r[iOrder] || '99').trim(), 10);
+          if (isNaN(order)) order = 99;
+          if (!cats[cat]) { cats[cat] = []; orders[cat] = order; }
+          cats[cat].push({ Title: (r[iTitle] || '').trim() });
+        });
+
+        /* Sort categories by Category_Order */
+        var sortedCats = Object.keys(cats).sort(function (a, b) {
+          return orders[a] - orders[b];
+        });
+
+        var html = sortedCats.map(function (cat) {
+          return renderCategory(cat, cats[cat]);
+        }).join('\n');
+
+        container.innerHTML = html;
+      })
+      .catch(function (err) {
+        console.error('ROW Careers: failed to load positions', err);
+        container.innerHTML = (
+          '<p class="positions-error">' +
+            'We could not load the current list of positions. ' +
+            'Please email <a href="mailto:gm@rowswimming.ca" style="color:#136B77;">gm@rowswimming.ca</a> ' +
+            'to express interest, or try refreshing the page.' +
+          '</p>'
+        );
+      });
+  })();
+
+
+  /* ── Form validation and submission ──────────────────────────────────── */
   (function () {
     var form    = document.getElementById('appForm');
     var btn     = document.getElementById('submitBtn');
