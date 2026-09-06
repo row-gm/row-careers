@@ -318,14 +318,16 @@
     <!-- ── Section 1: Positions of Interest ─────────────────────────────── -->
     <div class="form-section" id="sec-positions">
       <div class="section-title">Positions of Interest <span class="req">*</span></div>
-      <p class="section-intro">Select all roles you would like to be considered for. You may choose more than one.</p>
+      <p class="section-intro">List the role(s) from the job posting you are applying for. You may list more than one.</p>
 
-      <!-- Roles are loaded dynamically from the Google Sheet -->
-      <div id="positions-container">
-        <p class="positions-loading">Loading available positions…</p>
+      <div class="field-group" id="fg-positions">
+        <label class="field-label" for="positions">
+          Role(s) you are applying for <span class="req">*</span>
+        </label>
+        <textarea id="positions" name="positions" required rows="3"
+          placeholder="e.g. Lane Coach – TOPS (2x per week), Assistant – Junior Development 1"></textarea>
+        <p class="err-msg" id="err-positions">Please list the role(s) you are applying for.</p>
       </div>
-
-      <p class="err-msg" id="err-positions">Please select at least one position.</p>
     </div>
 
     <!-- ── Section 2: About You ──────────────────────────────────────────── -->
@@ -376,7 +378,7 @@
 
       <div class="field-group" id="fg-why-you">
         <label class="field-label" for="why-you">
-          What makes you the right person for this role? Walk us through the experience most relevant to the position(s) you selected above.
+          What makes you the right person for this role? Walk us through the experience most relevant to the position(s) you listed above.
           <span class="req">*</span>
         </label>
         <textarea id="why-you" name="why_you" required
@@ -397,137 +399,6 @@
 </div>
 
 <script>
-  /* ── Dynamic role loader ──────────────────────────────────────────────────
-     Fetches the Careers tab from the published Google Sheet CSV and builds
-     the Positions of Interest checkboxes dynamically.
-     Roles with Active = TRUE are shown; everything else is hidden.
-     Roles are grouped by Category, sorted by Category_Order.
-  ─────────────────────────────────────────────────────────────────────── */
-  (function () {
-    var CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSibBf9qGZWKNPOkutZn19X2zcqUG_HiuvauHTVtrcUkajm-I5dkLCgcL_GZ88l2BFkqWtBTorC3wHZ/pub?gid=0&single=true&output=csv';
-    var container = document.getElementById('positions-container');
-
-    /* Simple CSV parser — handles quoted fields with commas inside */
-    function parseCsv(text) {
-      var rows = [];
-      var lines = text.split(/\r?\n/);
-      for (var i = 0; i < lines.length; i++) {
-        var line = lines[i];
-        if (!line.trim()) continue;
-        var fields = [];
-        var cur = '';
-        var inQ = false;
-        for (var j = 0; j < line.length; j++) {
-          var ch = line[j];
-          if (ch === '"') {
-            if (inQ && line[j + 1] === '"') { cur += '"'; j++; }
-            else { inQ = !inQ; }
-          } else if (ch === ',' && !inQ) {
-            fields.push(cur); cur = '';
-          } else {
-            cur += ch;
-          }
-        }
-        fields.push(cur);
-        rows.push(fields);
-      }
-      return rows;
-    }
-
-    /* Escape text for safe HTML insertion */
-    function esc(s) {
-      return String(s)
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;');
-    }
-
-    /* Build the pathway-block HTML for one category */
-    function renderCategory(catName, roles) {
-      var checkItems = roles.map(function (role) {
-        var title = esc(role.Title);
-        return (
-          '<label class="check-item">' +
-            '<input type="checkbox" name="position[]" value="' + title + '">' +
-            '<span>' + title + '</span>' +
-          '</label>'
-        );
-      }).join('\n');
-
-      return (
-        '<div class="pathway-block">' +
-          '<div class="pathway-name">' + esc(catName) + '</div>' +
-          '<div class="check-list">' + checkItems + '</div>' +
-        '</div>'
-      );
-    }
-
-    /* Fetch and render */
-    fetch(CSV_URL)
-      .then(function (res) {
-        if (!res.ok) throw new Error('HTTP ' + res.status);
-        return res.text();
-      })
-      .then(function (text) {
-        var rows = parseCsv(text);
-        if (rows.length < 2) throw new Error('No data rows found');
-
-        /* Map header names to column indices */
-        var headers = rows[0].map(function (h) { return h.trim(); });
-        function col(name) { return headers.indexOf(name); }
-
-        var iTitle    = col('Title');
-        var iCategory = col('Category');
-        var iOrder    = col('Category_Order');
-        var iActive   = col('Active');
-
-        /* Filter to Active = TRUE */
-        var active = rows.slice(1).filter(function (r) {
-          var a = (r[iActive] || '').trim().toUpperCase();
-          return a === 'TRUE' || a === 'YES' || a === '1';
-        });
-
-        if (active.length === 0) {
-          container.innerHTML = '<p class="positions-error">No open positions at this time. Check back soon or email <a href="mailto:gm@rowswimming.ca" style="color:#136B77;">gm@rowswimming.ca</a> to express interest.</p>';
-          return;
-        }
-
-        /* Group by category, track order */
-        var cats = {};     /* catName → [role, …] */
-        var orders = {};   /* catName → Category_Order */
-        active.forEach(function (r) {
-          var cat   = (r[iCategory] || '').trim();
-          var order = parseInt((r[iOrder] || '99').trim(), 10);
-          if (isNaN(order)) order = 99;
-          if (!cats[cat]) { cats[cat] = []; orders[cat] = order; }
-          cats[cat].push({ Title: (r[iTitle] || '').trim() });
-        });
-
-        /* Sort categories by Category_Order */
-        var sortedCats = Object.keys(cats).sort(function (a, b) {
-          return orders[a] - orders[b];
-        });
-
-        var html = sortedCats.map(function (cat) {
-          return renderCategory(cat, cats[cat]);
-        }).join('\n');
-
-        container.innerHTML = html;
-      })
-      .catch(function (err) {
-        console.error('ROW Careers: failed to load positions', err);
-        container.innerHTML = (
-          '<p class="positions-error">' +
-            'We could not load the current list of positions. ' +
-            'Please email <a href="mailto:gm@rowswimming.ca" style="color:#136B77;">gm@rowswimming.ca</a> ' +
-            'to express interest, or try refreshing the page.' +
-          '</p>'
-        );
-      });
-  })();
-
-
   /* ── Form validation and submission ──────────────────────────────────── */
   (function () {
     var form    = document.getElementById('appForm');
@@ -543,10 +414,10 @@
     function validate() {
       var ok = true;
 
-      /* Positions: at least one checked */
-      var positions = form.querySelectorAll('input[name="position[]"]:checked');
-      var secPos    = document.getElementById('sec-positions');
-      if (positions.length === 0) {
+      /* Positions: textarea must not be empty */
+      var positionsEl = document.getElementById('positions');
+      var secPos      = document.getElementById('sec-positions');
+      if (!positionsEl.value.trim()) {
         secPos.classList.add('has-error');
         document.getElementById('err-positions').style.display = 'block';
         ok = false;
